@@ -16,13 +16,15 @@ typedef enum
 {
     PYGATE_STOPPED = 0,
     PYGATE_STARTED,
-    PYGATE_ERROR
+    PYGATE_ERROR,
+    PYGATE_LORA_PCKT_IN
 }machine_pygate_states_t;
 
 typedef void (*_sig_func_cb_ptr)(int);
 
 extern mp_obj_t NORETURN machine_reset(void);
 extern void machine_register_pygate_sig_handler(_sig_func_cb_ptr sig_handler);
+extern void machine_pygate_set_status_args(machine_pygate_states_t status, void* data, uint16_t len);
 extern void machine_pygate_set_status(machine_pygate_states_t status);
 
 #endif

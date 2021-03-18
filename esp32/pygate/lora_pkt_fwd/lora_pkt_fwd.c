@@ -1520,10 +1520,12 @@ void thread_up(void) {
             /* basic packet filtering */
             pthread_mutex_lock(&mx_meas_up);
             meas_nb_rx_rcv += 1;
+
+            MSG_INFO("[up  ] received pkt from mote: %08X (fcnt=%u/%X), RSSI %.1f\n", mote_addr, mote_fcnt, mote_fcnt, p->rssi);
+
             switch(p->status) {
                 case STAT_CRC_OK:
                     meas_nb_rx_ok += 1;
-                    MSG_INFO("[up  ] received pkt from mote: %08X (fcnt=%u/%X), RSSI %.1f\n", mote_addr, mote_fcnt, mote_fcnt, p->rssi);
                     //printf("RSSI %.1f\n", p->rssi);
                     if (!fwd_valid_pkt) {
                         pthread_mutex_unlock(&mx_meas_up);
@@ -1829,6 +1831,11 @@ void thread_up(void) {
         }
         pthread_mutex_unlock(&mx_meas_up);
         wait_ms (5);
+
+        /* register lora event if there's payload - extract JSON only */
+        if (pkt_in_dgram > 0) {
+            machine_pygate_set_status_args(PYGATE_LORA_PCKT_IN, (void *)(buff_up), buff_index);
+        }
     }
     MSG_INFO("[up  ] End of upstream thread\n\n");
 }

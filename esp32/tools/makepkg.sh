@@ -18,7 +18,7 @@ fi
 if [ -z $1 ]; then echo >&2 "Invalid board name!"; exit 1; fi
 if ! [ $0 = "tools/makepkg.sh" ]; then echo >&2 "Need to run as tools/makepkg.sh!"; exit 1; fi
 if ! [ -d boards/$1 ]; then echo >&2 "Unknown board type!"; exit 1; fi
-if ! [ -d ${BUILD_DIR} ]; then echo >&2 "Build directory for $1 not found! Run make BOARD=$1 first!"; exit 1; fi
+if ! [ -d "${BUILD_DIR}" ]; then echo >&2 "Build directory for $1 not found! Run make BOARD=$1 first!"; exit 1; fi
 if ! [ -r "pycom_version.h" ]; then echo >&2 "Cannot read pycom_version.h! Aborting."; exit 1; fi
 if [ "${BOARD}" = "GPY" -o  "${BOARD}" = "LOPY4" -o "${BOARD}" = "FIPY" ]; then
     if ! [ -r "boards/$1/${SCRIPT_NAME_8MB}" ]; then echo >&2 "Cannot read boards/$1/${SCRIPT_NAME_8MB}! Aborting."; exit 1; fi
@@ -35,11 +35,11 @@ if [ -z $2 ]; then
   RELEASE_DIR="$(pwd)/${BUILD_DIR}"
 else
   RELEASE_DIR=$(realpath $2 2>/dev/null || echo $2)
-      if ! [ -d $RELEASE_DIR ]; then
-    mkdir -p $RELEASE_DIR >/dev/null 2>&1 || { echo >&2 "Cannot create release directory! Aborting."; exit 1; }
+      if ! [ -d "$RELEASE_DIR" ]; then
+    mkdir -p "$RELEASE_DIR" >/dev/null 2>&1 || { echo >&2 "Cannot create release directory! Aborting."; exit 1; }
     RELEASE_DIR=$(realpath $2 2>/dev/null || echo $2)
   fi
-  if ! [ -w $RELEASE_DIR ]; then
+  if ! [ -w "$RELEASE_DIR" ]; then
     echo >&2 "Cannot write to ${RELEASE_DIR}! Aborting."
     exit 1
   fi
@@ -50,7 +50,7 @@ BOARD_NAME=$(echo $1 | tr '[IOY]' '[ioy]')
 BOARD_NAME_L=$(echo ${BOARD_NAME} | tr '[A-Z]' '[a-z]')
 VERSION=$(cat pycom_version.h |grep SW_VERSION_NUMBER | cut -d'"' -f2)
 PKG_TMP_DIR="${BUILD_DIR}/firmware_package"
-mkdir -p ${PKG_TMP_DIR}
+mkdir -p "${PKG_TMP_DIR}"
 
 PART_FILE_4MB=''
 PART_FILE_8MB=''
@@ -67,8 +67,8 @@ else
     FILE_NAME="$BOARD_NAME-$VERSION.tar.gz"
 fi
 
-cp ${BUILD_DIR}/bootloader/${BOOT_FILE} ${PKG_TMP_DIR}
-cp ${BUILD_DIR}/${APP_FILE} ${PKG_TMP_DIR}
+cp "${BUILD_DIR}/bootloader/${BOOT_FILE}" "${PKG_TMP_DIR}"
+cp "${BUILD_DIR}/${APP_FILE}" "${PKG_TMP_DIR}"
 
 if [ "${BOARD}" != "SIPY" ]; then
     if [ $4 ]; then
@@ -79,8 +79,8 @@ if [ "${BOARD}" != "SIPY" ]; then
         SCRIPT_FILE_8MB='script_8MB'
     fi
     
-    cp ${BUILD_DIR}/lib/${PART_FILE_8MB} ${PKG_TMP_DIR}
-    cat boards/$1/${SCRIPT_FILE_8MB} > ${PKG_TMP_DIR}/${SCRIPT_FILE_8MB} || { echo >&2 "Cannot create ${SCRIPT_FILE_8MB} file! Aborting."; exit 1; }
+    cp "${BUILD_DIR}/lib/${PART_FILE_8MB}" "${PKG_TMP_DIR}"
+    cat boards/$1/${SCRIPT_FILE_8MB} > "${PKG_TMP_DIR}"/${SCRIPT_FILE_8MB} || { echo >&2 "Cannot create ${SCRIPT_FILE_8MB} file! Aborting."; exit 1; }
 
     if [ "${BOARD}" = "LOPY" -o "${BOARD}" = "WIPY" ]; then
        if [ $4 ]; then
@@ -91,8 +91,8 @@ if [ "${BOARD}" != "SIPY" ]; then
             SCRIPT_FILE_4MB='script_4MB'
         fi
         
-        cp ${BUILD_DIR}/lib/${PART_FILE_4MB} ${PKG_TMP_DIR}
-        cat boards/$1/${SCRIPT_FILE_4MB} > ${PKG_TMP_DIR}/${SCRIPT_FILE_4MB} || { echo >&2 "Cannot create ${SCRIPT_FILE_4MB} file! Aborting."; exit 1; }
+        cp "${BUILD_DIR}/lib/${PART_FILE_4MB}" "${PKG_TMP_DIR}"
+        cat boards/$1/${SCRIPT_FILE_4MB} > "${PKG_TMP_DIR}"/${SCRIPT_FILE_4MB} || { echo >&2 "Cannot create ${SCRIPT_FILE_4MB} file! Aborting."; exit 1; }
     fi
 else
    if [ $4 ]; then
@@ -103,13 +103,13 @@ else
         SCRIPT_FILE_4MB='script_4MB'
     fi
     
-    cp ${BUILD_DIR}/lib/${PART_FILE_4MB} ${PKG_TMP_DIR}
-    cat boards/$1/${SCRIPT_FILE_4MB} > ${PKG_TMP_DIR}/${SCRIPT_FILE_4MB} || { echo >&2 "Cannot create ${SCRIPT_FILE_4MB} file! Aborting."; exit 1; }
+    cp "${BUILD_DIR}/lib/${PART_FILE_4MB}" "${PKG_TMP_DIR}"
+    cat boards/$1/${SCRIPT_FILE_4MB} > "${PKG_TMP_DIR}"/${SCRIPT_FILE_4MB} || { echo >&2 "Cannot create ${SCRIPT_FILE_4MB} file! Aborting."; exit 1; }
 
 fi
-cat boards/$1/script  > ${PKG_TMP_DIR}/script  || { echo >&2 "Cannot create legacy script file! Aborting."; exit 1; }
-cat boards/$1/script2  > ${PKG_TMP_DIR}/script2  || { echo >&2 "Cannot create legacy script2 file! Aborting."; exit 1; }
-tar -czf ${RELEASE_DIR}/${FILE_NAME} -C ${PKG_TMP_DIR} ${BOOT_FILE} ${PART_FILE_4MB} ${PART_FILE_8MB} ${APP_FILE} ${SCRIPT_FILE_4MB} ${SCRIPT_FILE_8MB} script script2 || { echo >&2 "Cannot create ${RELEASE_DIR}/${FILE_NAME}! Aborting."; exit 1; }
+cat boards/$1/script  > "${PKG_TMP_DIR}"/script  || { echo >&2 "Cannot create legacy script file! Aborting."; exit 1; }
+cat boards/$1/script2  > "${PKG_TMP_DIR}"/script2  || { echo >&2 "Cannot create legacy script2 file! Aborting."; exit 1; }
+tar -czf "${RELEASE_DIR}/${FILE_NAME}" -C "${PKG_TMP_DIR}" ${BOOT_FILE} ${PART_FILE_4MB} ${PART_FILE_8MB} ${APP_FILE} ${SCRIPT_FILE_4MB} ${SCRIPT_FILE_8MB} script script2 || { echo >&2 "Cannot create ${RELEASE_DIR}/${FILE_NAME}! Aborting."; exit 1; }
 echo "Release package ${FILE_NAME} created successfully."
 
-rm -rf ${PKG_TMP_DIR}/
+rm -rf "${PKG_TMP_DIR}"/

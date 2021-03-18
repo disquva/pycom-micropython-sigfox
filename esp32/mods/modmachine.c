@@ -104,6 +104,7 @@
 #define PYGATE_STOP_EVENT           (0x00001)
 #define PYGATE_START_EVENT          (0x00002)
 #define PYGATE_ERROR_EVENT          (0x00004)
+#define PYGATE_LORA_EVENT           (0x00008)
 #endif
 
 static RTC_DATA_ATTR int64_t mach_expected_wakeup_time;
@@ -157,6 +158,35 @@ void machine_init0(void) {
 void machine_register_pygate_sig_handler(_sig_func_cb_ptr sig_handler)
 {
     pygate_signal = sig_handler;
+}
+
+void machine_pygate_set_status_args(machine_pygate_states_t status, void* data, uint16_t len) 
+{
+    vstr_t vstr;
+    bool trig = false;
+    char* buffer = data;
+    pygate_status = status;
+    
+    switch (pygate_status)
+    {
+        case PYGATE_LORA_PCKT_IN:
+            if(machine_obj.trigger & PYGATE_LORA_EVENT)
+            {
+                vstr_init_len(&vstr, len);
+                memcpy(vstr.buf, buffer, len);
+                
+                trig = true;
+                machine_obj.events |= PYGATE_LORA_EVENT;
+                machine_obj.handler_arg = mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+            }
+            break;
+        default:
+            break;
+    }
+    if(trig)
+    {
+        mp_irq_queue_interrupt(machine_callback_handler, &machine_obj);
+    }
 }
 
 void machine_pygate_set_status(machine_pygate_states_t status)
@@ -673,6 +703,7 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_PYGATE_START_EVT),    MP_OBJ_NEW_SMALL_INT(PYGATE_START_EVENT) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_PYGATE_STOP_EVT),     MP_OBJ_NEW_SMALL_INT(PYGATE_STOP_EVENT) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_PYGATE_ERROR_EVT),    MP_OBJ_NEW_SMALL_INT(PYGATE_ERROR_EVENT) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_PYGATE_LORA_EVT),     MP_OBJ_NEW_SMALL_INT(PYGATE_LORA_EVENT) },
 #endif
 };
 
